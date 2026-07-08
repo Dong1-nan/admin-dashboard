@@ -1,0 +1,86 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: admin-postgres-prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password required}
+      POSTGRES_DB: ${POSTGRES_DB:-dashboard}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-dashboard}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+    networks:
+      - admin-network
+
+  server:
+    image: ${DOCKER_USERNAME}/admin-server:${IMAGE_TAG:-latest}
+    container_name: admin-server-prod
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dashboard}?schema=public
+      JWT_SECRET: ${JWT_SECRET:?JWT secret required}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      PORT: 3000
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+    networks:
+      - admin-network
+
+  web:
+    image: ${DOCKER_USERNAME}/admin-web:${IMAGE_TAG:-latest}
+    container_name: admin-web-prod
+    ports:
+      - "3001:80"
+    depends_on:
+      - server
+    restart: always
+    networks:
+      - admin-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: admin-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - web
+      - server
+    restart: always
+    networks:
+      - admin-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: admin-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    networks:
+      - admin-network
+
+volumes:
+  postgres_data:
+
+networks:
+  admin-network:
+    driver: bridge
