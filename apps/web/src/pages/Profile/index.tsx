@@ -6,7 +6,6 @@ import { ChangePasswordInput } from '../../types';
 
 export default function Profile() {
   const user = useAuthStore((state) => state.user);
-  const fetchUserInfo = useAuthStore((state) => state.fetchUserInfo);
   const [passwordForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
 

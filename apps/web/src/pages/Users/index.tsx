@@ -252,7 +252,7 @@ export default function Users() {
             name="email"
             label="邮箱"
             rules={[
-              { required: editingUser, message: '请输入邮箱' },
+              { required: !!editingUser, message: '请输入邮箱' },
               { type: 'email', message: '邮箱格式不正确' },
             ]}
           >

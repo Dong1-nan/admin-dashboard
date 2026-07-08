@@ -10,7 +10,7 @@ import {
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import { useState } from 'react';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '../../stores/auth';
 
 const { Header, Sider, Content } = AntdLayout;
 

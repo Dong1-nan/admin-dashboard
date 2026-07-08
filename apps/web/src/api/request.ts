@@ -1,8 +1,8 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { message } from 'antd';
 import { ApiResponse, ApiError } from '../types';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+const baseURL = (import.meta as any).env.VITE_API_BASE_URL || '/api';
 
 const request: AxiosInstance = axios.create({
   baseURL,
@@ -14,9 +14,9 @@ const request: AxiosInstance = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem('token');
-    if (token && config.headers) {
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

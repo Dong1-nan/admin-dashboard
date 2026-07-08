@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ConfigProvider, App as AntdApp } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
@@ -81,7 +81,6 @@ function AppRoutes() {
 }
 
 function App() {
-  // 初始化时检查登录状态并获取用户信息
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const fetchUserInfo = useAuthStore((state) => state.fetchUserInfo);
 

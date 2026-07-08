@@ -5,8 +5,7 @@ import {
   UpdateUserInput, 
   QueryParams, 
   PaginatedResponse,
-  DashboardStats,
-  ApiResponse
+  DashboardStats
 } from '../types';
 
 export const userApi = {

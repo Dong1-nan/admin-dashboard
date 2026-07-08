@@ -1,5 +1,5 @@
 import { get, post, put } from './request';
-import { LoginInput, LoginResponse, User, ChangePasswordInput, ApiResponse } from '../types';
+import { LoginInput, LoginResponse, User, ChangePasswordInput } from '../types';
 
 export const authApi = {
   login: (data: LoginInput) => post<LoginResponse>('/auth/login', data),
