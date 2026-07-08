@@ -30,11 +30,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install server dependencies
+        working-directory: apps/server
+        run: npm install
+
+      - name: Install web dependencies
+        working-directory: apps/web
+        run: npm install
 
       - name: Setup backend
         working-directory: apps/server
@@ -106,16 +113,16 @@ jobs:
             cd /opt/admin-dashboard
             
             # 拉取最新镜像
-            docker-compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml pull
             
             # 停止旧容器
-            docker-compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml down
             
             # 启动新容器
-            docker-compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml up -d
             
             # 清理旧镜像
             docker image prune -af
             
             # 检查服务状态
-            docker-compose -f docker-compose.prod.yml ps
+            docker compose -f docker-compose.prod.yml ps
