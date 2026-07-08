@@ -5,7 +5,7 @@ WORKDIR /app
 
 # 复制 package.json 并安装所有依赖
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # 复制 Prisma schema
 COPY prisma ./prisma/
@@ -22,7 +22,7 @@ WORKDIR /app
 
 # 复制 package.json 并安装生产依赖
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # 复制构建产物
 COPY --from=builder /app/dist ./dist
