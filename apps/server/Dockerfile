@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# 安装 OpenSSL（Prisma 依赖）
+RUN apk add --no-cache openssl
+
 # 复制 package.json 并安装所有依赖
 COPY package*.json ./
 RUN npm install
@@ -19,6 +22,9 @@ RUN npm run build
 FROM node:20-alpine
 
 WORKDIR /app
+
+# 安装 OpenSSL（Prisma 运行时依赖）
+RUN apk add --no-cache openssl
 
 # 复制 package.json 并安装生产依赖
 COPY package*.json ./
