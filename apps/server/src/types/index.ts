@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 // 类型定义
 export interface User {
   id: number;
@@ -52,7 +54,7 @@ export interface JwtPayload {
   role: 'ADMIN' | 'USER';
 }
 
-export interface AuthenticatedRequest extends Express.Request {
+export interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
 }
 

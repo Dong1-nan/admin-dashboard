@@ -1,11 +1,12 @@
-import { Response } from 'express';
+import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../types/index.js';
 import { successResponse, errorResponse, ErrorCode } from '../utils/response.js';
+import { verifyToken } from '../utils/jwt.js';
 
 export const authMiddleware = (
   req: AuthenticatedRequest,
   res: Response,
-  next: () => void
+  next: NextFunction
 ) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,22 +15,17 @@ export const authMiddleware = (
 
   const token = authHeader.split(' ')[1];
   
-  // 动态导入避免循环依赖
-  import('../utils/jwt.js').then(({ verifyToken }) => {
-    const payload = verifyToken(token);
-    if (!payload) {
-      return res.status(401).json(errorResponse(ErrorCode.UNAUTHORIZED, 'Token 无效或已过期'));
-    }
+  const payload = verifyToken(token);
+  if (!payload) {
+    return res.status(401).json(errorResponse(ErrorCode.UNAUTHORIZED, 'Token 无效或已过期'));
+  }
 
-    req.user = payload;
-    next();
-  }).catch(() => {
-    res.status(401).json(errorResponse(ErrorCode.UNAUTHORIZED, '认证失败'));
-  });
+  req.user = payload;
+  next();
 };
 
 export const requireRole = (roles: ('ADMIN' | 'USER')[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: () => void) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json(errorResponse(ErrorCode.UNAUTHORIZED, '未登录'));
     }

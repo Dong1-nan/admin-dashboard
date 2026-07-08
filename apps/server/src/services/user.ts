@@ -10,9 +10,9 @@ export class UserService {
     const where = params.keyword
       ? {
           OR: [
-            { username: { contains: params.keyword, mode: 'insensitive' } },
-            { email: { contains: params.keyword, mode: 'insensitive' } },
-            { nickname: { contains: params.keyword, mode: 'insensitive' } },
+            { username: { contains: params.keyword, mode: 'insensitive' as const } },
+            { email: { contains: params.keyword, mode: 'insensitive' as const } },
+            { nickname: { contains: params.keyword, mode: 'insensitive' as const } },
           ],
         }
       : {};
@@ -72,9 +72,6 @@ export class UserService {
     });
 
     if (existingUser) {
-      if (existingUser.username === input.username) {
-        throw new Error(ErrorCode.DUPLICATE_ENTRY);
-      }
       throw new Error(ErrorCode.DUPLICATE_ENTRY);
     }
 

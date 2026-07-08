@@ -9,8 +9,8 @@ export class LogService {
     const where = params.keyword
       ? {
           OR: [
-            { action: { contains: params.keyword, mode: 'insensitive' } },
-            { resource: { contains: params.keyword, mode: 'insensitive' } },
+            { action: { contains: params.keyword, mode: 'insensitive' as const } },
+            { resource: { contains: params.keyword, mode: 'insensitive' as const } },
           ],
         }
       : {};
