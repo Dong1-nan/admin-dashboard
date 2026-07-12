@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'ubuntu_vm'
+    static_configs:
+      - targets: ['node-exporter:9100']   # Docker 内部 DNS 会自动解析服务名

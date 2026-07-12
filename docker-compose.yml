@@ -1,4 +1,5 @@
 services:
+
   postgres:
     image: postgres:16-alpine
     container_name: admin-postgres
@@ -15,6 +16,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network   # 加入自定义网络
 
   server:
     build:
@@ -35,6 +38,8 @@ services:
     volumes:
       - ./apps/server/src:/app/src:ro
       - ./apps/server/prisma:/app/prisma:ro
+    networks:
+      - app-network
 
   web:
     build:
@@ -45,6 +50,61 @@ services:
       - "80:80"
     depends_on:
       - server
+    networks:
+      - app-network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2)($$|/)'
+    ports:
+      - "9100:9100"
+    networks:
+      - app-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    networks:
+      - app-network
+    depends_on:
+      - node-exporter
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"          # 改为 3001，避免与 server 冲突
+    networks:
+      - app-network
+    depends_on:
+      - prometheus
 
 volumes:
   postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  app-network:
+    driver: bridge
